@@ -3,8 +3,9 @@ import praw
 from pprint import pprint
 #import pyimgur
 
-version = "0.1"
+version = "0.2"
 debug_force_cached = False
+debug = False
 
 def with_status(iterable):
     """Wrap an iterable outputting '.' for each item (up to 100 per line)."""
@@ -17,10 +18,32 @@ def with_status(iterable):
 
     sys.stderr.write('\n')
 
-def do_filter(likes):
-	print("## filtered ##")
+def filter_save(url, subs):
+	# equiv of: "earth" in u'/r/EarthPorn'
+	for s in subs:
+		if s.lower() in url.lower(): return True
+	return False
 
-def do_stuff(likes):
+
+
+def do_filter(likes, subs):
+	# instead should delete or use that built in func/class to filter+delete
+	# then do work in main()
+	print("## filtered ##")
+	for cur in likes:
+		#print(cur.subreddit.url)
+		#if not subs in cur.subreddit.url:
+			#continue
+		if filter_save(cur.subreddit.url, subs):
+			#print("no", cur.permalink)
+			print("get: ", cur.url)
+
+		# download url
+
+		#SEE CHANGELOT FOR TODO
+
+
+def print_debug(likes):
 	# see also: dir(cur)
 	for cur in likes:
 		print("#")
@@ -33,45 +56,17 @@ def do_stuff(likes):
 
 def main(sub_names):
 	# Very important to get UserAgent part right, including a version number.
-	user_agent = ("Srid subreddit image downloader/{} by u/MonkeyNin https://github.com/ninmonkey/srid".format(version))
+	user_agent = ("Srid subreddit image downloader/v{} by u/MonkeyNin https://github.com/ninmonkey/srid".format(version))
 
 	print('user_agent:', user_agent, "\n")
-	r = praw.Reddit(user_agent, "nin")
+	r = praw.Reddit(user_agent, "nin") # Set user/pass in praw.ini
 	r.login()
 	print("logged in? ", isinstance(r.user, praw.objects.LoggedInRedditor))
 
 	likes = list(r.user.get_liked(10))
-	do_stuff(likes)
-	do_filter(likes)
 
-
-
-
-def mainold():
-
-	r = praw.Reddit(user_agent=user_agent)
-
-	print("UserAgent:", user_agent)
-	for name in subs_names:
-		print("sub:", name)
-
-	# one sub only for now
-	subreddit = r.get_subreddit("ImaginaryMonsters")
-	#submissions = [ i for i in subreddit.get_hot(10) ]
-	for submission in subreddit.get_hot(10):
-		print('yeah')
-		return
-
-	# debug show json
-	pprint(vars(submissions[0]))
-
-	print("\n\n== loop ==")
-	for cur in submissions:
-		title = cur["title"]
-		print("post: {}".format(title))
-
-
-
+	if debug: print_debug(likes)
+	do_filter(likes, sub_names)
 
 if __name__ == "__main__":
 	print("start")
