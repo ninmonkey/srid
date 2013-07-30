@@ -1,10 +1,15 @@
 from __future__ import print_function, division
-import praw
 from pprint import pprint
+import pickle
+import os
+import time
+
+import praw
 #import pyimgur
 
+SLEEP_IN_SECS = 0.3
 version = "0.2"
-debug_force_cached = False
+#debug_force_cached = False
 debug = False
 
 def with_status(iterable):
@@ -18,13 +23,19 @@ def with_status(iterable):
 
     sys.stderr.write('\n')
 
-def filter_save(url, subs):
+#def filter_save(url, subs):
 	# equiv of: "earth" in u'/r/EarthPorn'
-	for s in subs:
-		if s.lower() in url.lower(): return True
-	return False
+	#for s in subs:
+		#if s.lower() in url.lower(): return True
+	#return False
 
-
+def sanitize_filename(filename):
+	# strip invalid chars from filename.
+	# win7 says to use these, so it may not be fully correct cross platform
+	invalid_chars = '\/|*?"<>:'
+	only_ascii = filename.encode("ascii", "ignore")
+	safe_name = "".join(ch for ch in only_ascii if ch not in invalid_chars )
+	return safe_name
 
 def do_filter(likes, subs):
 	# instead should delete or use that built in func/class to filter+delete
@@ -36,16 +47,16 @@ def do_filter(likes, subs):
 			#continue
 		#if filter_save(cur.subreddit.url, subs):
 			#print("no", cur.permalink)
-		if subs[0].lower() in cur.subreddit.url.lower():
+
+		if any(sub.lower() in cur.subreddit.url.lower() for sub in subs):
+		#if subs[0].lower() in cur.subreddit.url.lower():
 			print("get: ", cur.url, " -- ", cur.subreddit.url)
+			# download here
+			time.sleep(SLEEP_IN_SECS)
 		else:
 			print("failed: ", cur.subreddit.url)
 
-
-		# download url
-
-		#SEE CHANGELOT FOR TODO
-
+		# slight delay
 
 def print_debug(likes):
 	# see also: dir(cur)
@@ -58,6 +69,7 @@ def print_debug(likes):
 
 def main(sub_names, num=10):
 	# Very important to get UserAgent part right, including a version number.
+
 	user_agent = ("Srid subreddit image downloader/v{} by u/MonkeyNin https://github.com/ninmonkey/srid".format(version))
 	print("\tsubs:", sub_names)
 
@@ -66,10 +78,13 @@ def main(sub_names, num=10):
 	r.login()
 	print("logged in? ", isinstance(r.user, praw.objects.LoggedInRedditor))
 
-	likes = list(r.user.get_liked(num))
+	# list form
+	#likes = list(r.user.get_liked(num))
+	#if debug: print_debug(likes)
+	#do_filter(likes, sub_names)
 
-	if debug: print_debug(likes)
-	do_filter(likes, sub_names)
+	# gen form
+	do_filter(r.user.get_liked(num), sub_names)
 
 if __name__ == "__main__":
 
