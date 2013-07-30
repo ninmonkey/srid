@@ -34,9 +34,13 @@ def do_filter(likes, subs):
 		#print(cur.subreddit.url)
 		#if not subs in cur.subreddit.url:
 			#continue
-		if filter_save(cur.subreddit.url, subs):
+		#if filter_save(cur.subreddit.url, subs):
 			#print("no", cur.permalink)
-			print("get: ", cur.url)
+		if subs[0].lower() in cur.subreddit.url.lower():
+			print("get: ", cur.url, " -- ", cur.subreddit.url)
+		else:
+			print("failed: ", cur.subreddit.url)
+
 
 		# download url
 
@@ -52,22 +56,27 @@ def print_debug(likes):
 		print("permalink=", cur.permalink)
 		print("url=", cur.url)
 
-
-
-def main(sub_names):
+def main(sub_names, num=10):
 	# Very important to get UserAgent part right, including a version number.
 	user_agent = ("Srid subreddit image downloader/v{} by u/MonkeyNin https://github.com/ninmonkey/srid".format(version))
+	print("\tsubs:", sub_names)
 
 	print('user_agent:', user_agent, "\n")
 	r = praw.Reddit(user_agent, "nin") # Set user/pass in praw.ini
 	r.login()
 	print("logged in? ", isinstance(r.user, praw.objects.LoggedInRedditor))
 
-	likes = list(r.user.get_liked(10))
+	likes = list(r.user.get_liked(num))
 
 	if debug: print_debug(likes)
 	do_filter(likes, sub_names)
 
 if __name__ == "__main__":
-	print("start")
-	main(['AnimalPorn', 'SpacePorn'])
+
+	subs_photos = ["EarthPorn", "AnimalPorn", "SpacePorn", "wallpaper", "itookapicture", "photocritique"]
+	subs_imaginary = ["imaginaryArmor", "imaginaryBattlefields", "imaginaryCharacters", "imaginaryCityscapes", "imaginaryLandscapes", "imaginaryRobotics", "imaginaryStarships", "imaginaryTechnology", "imaginaryVehicles", "imaginaryWeaponry", "imaginaryMonsters", "SpecArt"]
+	subs_sfw_images = [ "microporn","AbandonedPorn", "futurePorn", "AdPorn", "AlbumArtPorn", "ArchitecturePorn", "ArtPorn", "BookPorn", "CityPorn", "DesignPorn", "DestructionPorn", "EarthPorn", "FirePorn", "HistoryPorn", "GeologyPorn", "images", "FossilPorn", "MilitaryPorn", "MapPorn", "MoviePosterPorn", "ColorizedHistory", "BattlePaintings", "FighterJets", "Airplanes", "Helicopters", "WarshipPorn", "Helicopters", "HumanPorn", "OldSchoolCool", "TheWayWeWere", "VintageAds", "PropagandaPosters", "Castles", "concertposterporn", "VHScoverART", "geekporn", "waterporn", "quotesporn", "ruralporn"]
+	subs_people = [ "PrettyGirls", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
+
+	subs = subs_photos + subs_imaginary + subs_sfw_images + subs_people
+	main(subs, num=10)

@@ -1,3 +1,13 @@
+## later ##
+
+	1. min-image-size
+	1. default always delete NSFW images
+
+	98. copy wallpaper sized to another dir
+	99. /r/redditgetsdrawn/ special case check comments for upvoted images
+	99. test gallery images work:
+		http://www.reddit.com/r/MicroPorn/comments/19pr0v/fractal_bacteria_colonies_xpost_from_rbiology/
+
 
 ## FIRST ##
 
@@ -22,6 +32,10 @@
 
 ## changes ##
 
-- grab list of upvotes, or check property of reddit list
+# v0.2
+
+- filters using preset subs
 
 # v0.1
+
+- grab lists of upvoted images
