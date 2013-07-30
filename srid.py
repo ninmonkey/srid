@@ -3,14 +3,17 @@ from pprint import pprint
 import pickle
 import os
 import time
+import urllib
 
 import praw
 #import pyimgur
 
-SLEEP_IN_SECS = 0.3
+SLEEP_IN_SECS = 2. # 0.3
 version = "0.2"
 #debug_force_cached = False
 debug = False
+
+stats_downloaded = 0
 
 def with_status(iterable):
     """Wrap an iterable outputting '.' for each item (up to 100 per line)."""
@@ -23,12 +26,6 @@ def with_status(iterable):
 
     sys.stderr.write('\n')
 
-#def filter_save(url, subs):
-	# equiv of: "earth" in u'/r/EarthPorn'
-	#for s in subs:
-		#if s.lower() in url.lower(): return True
-	#return False
-
 def sanitize_filename(filename):
 	# strip invalid chars from filename.
 	# win7 says to use these, so it may not be fully correct cross platform
@@ -37,21 +34,36 @@ def sanitize_filename(filename):
 	safe_name = "".join(ch for ch in only_ascii if ch not in invalid_chars )
 	return safe_name
 
+def download_file(url, subreddit, title):
+	global stats_downloaded
+	# save from url, to ./srid-downloaded/{subreddit}/{title}
+	ext = os.path.splitext(url)[1]
+
+	# imgur has bad file names
+	ext = "".join(ch for ch in ext if ch not in '?1234567890')
+
+	safe_title = sanitize_filename(title)
+	folder = os.path.join("srid-downloaded", subreddit)
+	filename = os.path.join(folder, safe_title + ext)
+
+	try:
+		os.mkdir(folder)
+	except:
+		pass
+	print("writing...: ", filename)
+	urllib.urlretrieve(url, filename)
+
+	stats_downloaded += 1
+
 def do_filter(likes, subs):
 	# instead should delete or use that built in func/class to filter+delete
 	# then do work in main()
 	print("## filtered ##")
 	for cur in likes:
-		#print(cur.subreddit.url)
-		#if not subs in cur.subreddit.url:
-			#continue
-		#if filter_save(cur.subreddit.url, subs):
-			#print("no", cur.permalink)
-
 		if any(sub.lower() in cur.subreddit.url.lower() for sub in subs):
 		#if subs[0].lower() in cur.subreddit.url.lower():
 			print("get: ", cur.url, " -- ", cur.subreddit.url)
-			# download here
+			download_file(cur.url, cur.subreddit.display_name, cur.title)
 			time.sleep(SLEEP_IN_SECS)
 		else:
 			print("failed: ", cur.subreddit.url)
@@ -59,7 +71,7 @@ def do_filter(likes, subs):
 		# slight delay
 
 def print_debug(likes):
-	# see also: dir(cur)
+	# see also: dir(cur) and pprint(vars(cur))
 	for cur in likes:
 		print("#")
 		print("sub=", cur.subreddit.url)
@@ -84,7 +96,7 @@ def main(sub_names, num=10):
 	#do_filter(likes, sub_names)
 
 	# gen form
-	do_filter(r.user.get_liked(num), sub_names)
+	do_filter(r.user.get_liked(limit=num), sub_names)
 
 if __name__ == "__main__":
 
@@ -94,4 +106,5 @@ if __name__ == "__main__":
 	subs_people = [ "PrettyGirls", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
 
 	subs = subs_photos + subs_imaginary + subs_sfw_images + subs_people
-	main(subs, num=10)
+	main(subs, num=200)
+	print("Downloaded: ", stats_downloaded)

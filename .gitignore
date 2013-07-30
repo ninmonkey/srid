@@ -1,4 +1,6 @@
 praw.ini
+srid-downloaded/
+cache/
 
 #################
 ## Eclipse

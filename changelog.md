@@ -1,5 +1,7 @@
 ## later ##
 
+	# file-ext frommime type #
+
 	1. min-image-size
 	1. default always delete NSFW images
 
@@ -13,6 +15,8 @@
 		visualization
 
 ## FIRST ##
+
+
 
 2. safe title to -> filename
 	sanitize() -- from reddit_image_downloader.py
