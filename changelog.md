@@ -8,19 +8,22 @@
 	99. test gallery images work:
 		http://www.reddit.com/r/MicroPorn/comments/19pr0v/fractal_bacteria_colonies_xpost_from_rbiology/
 
+	100. save metadata to post url, (tinyurl in filename?)
+		and special data /dataisbeatiful/
+		visualization
 
 ## FIRST ##
 
-1. do
-	['earth', 'space'] in name
-	filter_save *ALWAYS FAILS*
-
 2. safe title to -> filename
 	sanitize() -- from reddit_image_downloader.py
+	test on space
+
+
 
 3. create /root/sub/ if not existing
 4. file exists? /root/sub/title.ext
 5. if not, then download file
+6. output file url + filename for failed
 
 
 
