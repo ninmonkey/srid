@@ -1,6 +1,6 @@
 from __future__ import print_function, division
-from pprint import pprint
-import pickle
+#from pprint import pprint
+#import pickle
 import os
 import time
 import urllib
@@ -8,23 +8,24 @@ import urllib
 import praw
 #import pyimgur
 
-SLEEP_IN_SECS = 2. # 0.3
-version = "0.2"
+SLEEP_IN_SECS = 2.  # 0.3
+version = "0.2.1"
 #debug_force_cached = False
 debug = False
 
 stats_downloaded = 0
 
-def with_status(iterable):
-    """Wrap an iterable outputting '.' for each item (up to 100 per line)."""
-    for i, item in enumerate(iterable):
-        sys.stderr.write('.')
-        sys.stderr.flush()
-        if i % 100 == 99:
-            sys.stderr.write('\n')
-        yield item
+#def with_status(iterable):
+    #"""Wrap an iterable outputting '.' for each item (up to 100 per line)."""
+    #for i, item in enumerate(iterable):
+        #sys.stderr.write('.')
+        #sys.stderr.flush()
+        #if i % 100 == 99:
+            #sys.stderr.write('\n')
+        #yield item
 
-    sys.stderr.write('\n')
+    #sys.stderr.write('\n')
+
 
 def sanitize_filename(filename):
 	# strip invalid chars from filename.
@@ -50,7 +51,8 @@ def download_file(url, subreddit, title):
 		os.mkdir(folder)
 	except:
 		pass
-	print("writing...: ", filename)
+
+	if debug: print("writing...: ", filename)
 	urllib.urlretrieve(url, filename)
 
 	stats_downloaded += 1
@@ -58,12 +60,12 @@ def download_file(url, subreddit, title):
 def do_filter(likes, subs):
 	# instead should delete or use that built in func/class to filter+delete
 	# then do work in main()
-	print("## filtered ##")
 	for cur in likes:
 		if any(sub.lower() in cur.subreddit.url.lower() for sub in subs):
 		#if subs[0].lower() in cur.subreddit.url.lower():
-			print("get: ", cur.url, " -- ", cur.subreddit.url)
+			if debug: print("get: ", cur.url, " -- ", cur.subreddit.url)
 			download_file(cur.url, cur.subreddit.display_name, cur.title)
+			print(".", end="")
 			time.sleep(SLEEP_IN_SECS)
 		else:
 			print("failed: ", cur.subreddit.url)
@@ -83,12 +85,12 @@ def main(sub_names, num=10):
 	# Very important to get UserAgent part right, including a version number.
 
 	user_agent = ("Srid subreddit image downloader/v{} by u/MonkeyNin https://github.com/ninmonkey/srid".format(version))
-	print("\tsubs:", sub_names)
+	if debug: print("\tsubs:", sub_names)
 
 	print('user_agent:', user_agent, "\n")
 	r = praw.Reddit(user_agent, "nin") # Set user/pass in praw.ini
 	r.login()
-	print("logged in? ", isinstance(r.user, praw.objects.LoggedInRedditor))
+	if debug: print("logged in? ", isinstance(r.user, praw.objects.LoggedInRedditor))
 
 	# list form
 	#likes = list(r.user.get_liked(num))
@@ -106,5 +108,6 @@ if __name__ == "__main__":
 	subs_people = [ "PrettyGirls", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
 
 	subs = subs_photos + subs_imaginary + subs_sfw_images + subs_people
-	main(subs, num=200)
-	print("Downloaded: ", stats_downloaded)
+	print("downloading:")
+	main(subs, num=100)
+	print("\nDownloaded: ", stats_downloaded)

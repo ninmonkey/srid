@@ -1,47 +1,47 @@
+#### usage ####
+
+	1. set username/pass in your praw.ini , to find the location:
+		https://praw.readthedocs.org/en/latest/pages/configuration_files.html
+
+	2. Run for default subs, and fetch count: 100
+
+## FIRST ##
+
+	1. create /root/sub/ if not existing
+
 ## later ##
 
 	# file-ext frommime type #
 
-	1. min-image-size
-	1. default always delete NSFW images
+	1. custom location for /srid-downloaded/
 
-	98. copy wallpaper sized to another dir
-	99. /r/redditgetsdrawn/ special case check comments for upvoted images
+	1. min-image-size 	1. copy wallpaper sized to another dir
+	1. default bool filter NSFW images
+	1. more error handling to continue on individual failed images
+
+	1. change debug to logging
+
+	1. command args:
+		1. count
+		2. input filename
+
+	100. save metadata to post url, (tinyurl in filename?)
+
 	99. test gallery images work:
 		http://www.reddit.com/r/MicroPorn/comments/19pr0v/fractal_bacteria_colonies_xpost_from_rbiology/
 
-	100. save metadata to post url, (tinyurl in filename?)
-		and special data /dataisbeatiful/
-		visualization
+	1. special cases:
+		1. /r/redditgetsdrawn/ special case check comments for upvoted images
+		1. and special data /r/dataisbeatiful or /r/visualization
 
-## FIRST ##
+#### changelog ####
 
+# v0.2.1
 
-
-2. safe title to -> filename
-	sanitize() -- from reddit_image_downloader.py
-	test on space
-
-
-
-3. create /root/sub/ if not existing
-4. file exists? /root/sub/title.ext
-5. if not, then download file
-6. output file url + filename for failed
-
-
-
-
-
-
-
-## next ##
-
-## changes ##
-
-# v0.2
-
+- fully working, saves images to ./srid-downloaded/*
 - filters using preset subs
+- converts to safe filenames, including imgur urls: foo.png?1
+- pep8
 
 # v0.1
 
