@@ -11,7 +11,7 @@
 
 ## later ##
 
-	# file-ext frommime type #
+	1. grab extension from MIME.
 
 	1. custom location for /srid-downloaded/
 
@@ -25,9 +25,9 @@
 		1. count
 		2. input filename
 
-	100. save metadata to post url, (tinyurl in filename?)
+	1. save metadata to post url, (tinyurl in filename?)
 
-	99. test gallery images work:
+	1. test gallery images work:
 		http://www.reddit.com/r/MicroPorn/comments/19pr0v/fractal_bacteria_colonies_xpost_from_rbiology/
 
 	1. special cases:
