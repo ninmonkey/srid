@@ -11,6 +11,14 @@
 
 ## FIRST ##
 
+
+
+
+	1. flickr doesn't download properly.
+		just save flickr url posts to a pickle, to download later when implemented
+
+
+
 	1. default bool filter NSFW images
 		save to /srid-downloaded-NSFW/*
 
@@ -21,6 +29,7 @@
 	1. create /root/sub/ if not existing
 
 ## later ##
+
 
 	1. if submission == last_newest, then quit early
 

@@ -7,15 +7,18 @@ import pickle
 import praw
 
 SLEEP_IN_SECS = 1.3  # 0.3
-version = "0.2.3"
+version = "0.2.5"
 debug = False
+ignore_cache = False
 stats_downloaded = 0
-stats_filtered = 0
 
 
 def load_cache():
     # get last-retrieved
     path = os.path.join("srid-downloaded", "cache.pkl")
+
+    if ignore_cache:
+        return (None, None, None)
 
     try:
         with open(path, "rb") as f:
@@ -33,6 +36,24 @@ def save_cache(cache):
         pickle.dump(cache, f)
 
 
+def save_url(url, subreddit, title):
+    # save for later, like flickr which don't work.
+    path = os.path.join("srid-downloaded", "saved_urls.pkl")
+
+    urls = []
+    # load prev urls, and append to file
+    try:
+        with open(path, "rb") as f:
+            urls = pickle.load(f)
+    except IOError:
+        urls = []
+
+    # save
+    with open(path, "wb") as f:
+        urls.append((url, subreddit, title))
+        pickle.dump(urls, f)
+
+
 def sanitize_filename(filename):
     # return a valid filename.
     # win7 says to use these, so it may not be fully correct cross platform,
@@ -45,7 +66,7 @@ def sanitize_filename(filename):
 
 def download_file(url, subreddit, title):
     # save from url, to ./srid-downloaded/{subreddit}/{title}
-    global stats_downloaded, stats_filtered
+    global stats_downloaded
     ext = os.path.splitext(url)[1]
 
     # imgur has bad file names
@@ -54,6 +75,14 @@ def download_file(url, subreddit, title):
     safe_title = sanitize_filename(title)
     folder = os.path.join("srid-downloaded", subreddit)
     filename = os.path.join(folder, safe_title + ext)
+
+    # if url appears to be bad, save for later incase I can preserve it
+    if filename.endswith(".png") or filename.endswith(".jpg"):
+        if debug:
+            print("good: ", filename)
+    else:
+        print("bad name?\n\t{}\n\t{}".format(url, filename))
+        save_url(url, subreddit, title)
 
     try:
         os.mkdir(folder)
@@ -68,8 +97,6 @@ def download_file(url, subreddit, title):
         stats_downloaded += 1
         urllib.urlretrieve(url, filename)
         time.sleep(SLEEP_IN_SECS)
-
-    stats_filtered += 1
 
 
 def do_filter(likes, subs):
@@ -132,15 +159,16 @@ def main(sub_names, num=10):
     do_filter(r.user.get_liked(limit=num), sub_names)
 
 if __name__ == "__main__":
-    # hardcoded for now
-    subs_photos = ["EarthPorn", "AnimalPorn", "SpacePorn", "wallpaper", "itookapicture", "photocritique"]
+    # hardcoded for now, multiple only to simplify groups
+    subs_aww = ["aww", "birds", "cats"]
+    subs_comics = ["comics"]
+    subs_photos = ["NationalGeographic", "EarthPorn", "AnimalPorn", "SpacePorn", "wallpaper", "wallpapers", "itookapicture", "photocritique"]
     subs_imaginary = ["imaginary", "imaginaryArmor", "imaginaryBattlefields", "imaginaryCharacters", "imaginaryCityscapes", "imaginaryLandscapes", "imaginaryRobotics", "imaginaryStarships", "imaginaryTechnology", "imaginaryVehicles", "imaginaryWeaponry", "imaginaryMonsters", "SpecArt", "imaginaryLandscapes"]
-    subs_sfw_images = ["microporn", "AbandonedPorn", "futurePorn", "AdPorn", "AlbumArtPorn", "ArchitecturePorn", "ArtPorn", "BookPorn", "CityPorn", "DesignPorn", "DestructionPorn", "EarthPorn", "FirePorn", "HistoryPorn", "GeologyPorn", "images", "FossilPorn", "MilitaryPorn", "MapPorn", "MoviePosterPorn", "ColorizedHistory", "BattlePaintings", "FighterJets", "Airplanes", "Helicopters", "WarshipPorn", "Helicopters", "HumanPorn", "OldSchoolCool", "TheWayWeWere", "VintageAds", "PropagandaPosters", "Castles", "concertposterporn", "VHScoverART", "geekporn", "waterporn", "quotesporn", "ruralporn", "macroporn", "winterporn", "ArchitecturePorn"]
-    subs_people = ["PrettyGirls", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
+    subs_sfw_images = ["lowpoly", "starshipporn", "microporn", "AbandonedPorn", "futurePorn", "AdPorn", "AlbumArtPorn", "ArchitecturePorn", "ArtPorn", "BookPorn", "CityPorn", "DesignPorn", "DestructionPorn", "EarthPorn", "FirePorn", "HistoryPorn", "GeologyPorn", "images", "FossilPorn", "MilitaryPorn", "MapPorn", "MoviePosterPorn", "ColorizedHistory", "BattlePaintings", "FighterJets", "Airplanes", "Helicopters", "WarshipPorn", "Helicopters", "HumanPorn", "OldSchoolCool", "TheWayWeWere", "VintageAds", "PropagandaPosters", "Castles", "concertposterporn", "VHScoverART", "geekporn", "waterporn", "quotesporn", "ruralporn", "macroporn", "winterporn", "ArchitecturePorn", "WQHD_Wallpaper"]
+    subs_people = ["ladyladyboners", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
 
-    subs = subs_photos + subs_imaginary + subs_sfw_images + subs_people
+    subs = subs_aww + subs_comics + subs_photos + subs_imaginary + subs_sfw_images + subs_people
 
     print("downloading: sleep = {}secs".format(SLEEP_IN_SECS))
     main(subs, num=100)
-    print("\nDownloaded: {} [filtered: {}], ".format(
-            stats_downloaded, stats_filtered))
+    print("\nDownloaded new images: {}".format(stats_downloaded))
