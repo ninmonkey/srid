@@ -13,16 +13,21 @@
 
 
 
+	special handler func based on domain
 
-	1. flickr doesn't download properly.
-		just save flickr url posts to a pickle, to download later when implemented
+		1. imgur extensionless needs mime type
+
+		1. flickr doesn't download properly.
+			just save flickr url posts to a pickle, to download later when implemented
+
+
+
+
 
 
 
 	1. default bool filter NSFW images
 		save to /srid-downloaded-NSFW/*
-
-	1. *save* failed downloaded urls, incase imgur:gallery or flickr posts
 
 	1. log amount of *new* images
 
@@ -57,7 +62,13 @@
 		1. /r/redditgetsdrawn/ special case check comments for upvoted images
 		1. and special data /r/dataisbeatiful or /r/visualization
 
+	1. "discover" mode
+		-output list of subs in history, if post link is:image.
+
 #### changelog ####
+
+# v0.2.5
+	-special behaviours for specific sites (imgur)
 
 # v0.2.3
 	- less .delay() if file exists

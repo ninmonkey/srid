@@ -8,7 +8,7 @@ import praw
 
 SLEEP_IN_SECS = 1.3  # 0.3
 version = "0.2.5"
-debug = False
+debug = True
 ignore_cache = False
 stats_downloaded = 0
 
@@ -48,10 +48,17 @@ def save_url(url, subreddit, title):
     except IOError:
         urls = []
 
-    # save
-    with open(path, "wb") as f:
-        urls.append((url, subreddit, title))
-        pickle.dump(urls, f)
+    # save if new
+    val = (url, subreddit, title)
+    if not val in urls:
+        urls.append(val)
+
+        with open(path, "wb") as f:
+            pickle.dump(urls, f)
+
+        #print("== saved failed urls ==")
+        #pprint(urls)
+        print("len: ", len(urls))
 
 
 def sanitize_filename(filename):
@@ -67,7 +74,7 @@ def sanitize_filename(filename):
 def download_file(url, subreddit, title):
     # save from url, to ./srid-downloaded/{subreddit}/{title}
     global stats_downloaded
-    ext = os.path.splitext(url)[1]
+    ext = os.path.splitext(url)[1].lower()
 
     # imgur has bad file names
     ext = "".join(ch for ch in ext if ch not in '?1234567890')
@@ -77,7 +84,9 @@ def download_file(url, subreddit, title):
     filename = os.path.join(folder, safe_title + ext)
 
     # if url appears to be bad, save for later incase I can preserve it
-    if filename.endswith(".png") or filename.endswith(".jpg"):
+    #if filename.endswith(".png") or filename.endswith(".jpg"):
+    #if ext == "".png") or filename.endswith(".jpg"):
+    if any(x == ext for x in ("jpg", "jpeg", "png", "gif")):
         if debug:
             print("good: ", filename)
     else:
@@ -147,7 +156,7 @@ def main(sub_names, num=10):
     user_agent = ("Srid subreddit image downloader/v{} by u/MonkeyNin "
                 "https://github.com/ninmonkey/srid".format(version))
     if debug:
-        print("\tsubs:", sub_names)
+        print("num", num, "\n\tsubs:", sub_names)
 
     print('user_agent:', user_agent, "\n")
     r = praw.Reddit(user_agent, "nin")  # Set user/pass in praw.ini
@@ -162,13 +171,13 @@ if __name__ == "__main__":
     # hardcoded for now, multiple only to simplify groups
     subs_aww = ["aww", "birds", "cats"]
     subs_comics = ["comics"]
-    subs_photos = ["NationalGeographic", "EarthPorn", "AnimalPorn", "SpacePorn", "wallpaper", "wallpapers", "itookapicture", "photocritique"]
-    subs_imaginary = ["imaginary", "imaginaryArmor", "imaginaryBattlefields", "imaginaryCharacters", "imaginaryCityscapes", "imaginaryLandscapes", "imaginaryRobotics", "imaginaryStarships", "imaginaryTechnology", "imaginaryVehicles", "imaginaryWeaponry", "imaginaryMonsters", "SpecArt", "imaginaryLandscapes"]
+    subs_photos = ["NationalGeographic", "EarthPorn", "AnimalPorn", "SpacePorn", "wallpaper", "wallpapers", "itookapicture", "photocritique", "skyporn"]
+    subs_imaginary = ["imaginary", "imaginaryArmor", "imaginaryBattlefields", "imaginaryCharacters", "imaginaryCityscapes", "imaginaryLandscapes", "imaginaryRobotics", "imaginaryStarships", "imaginaryTechnology", "imaginaryVehicles", "imaginaryWeaponry", "imaginaryMonsters", "SpecArt", "imaginaryLandscapes", "ImaginaryWildlands"]
     subs_sfw_images = ["lowpoly", "starshipporn", "microporn", "AbandonedPorn", "futurePorn", "AdPorn", "AlbumArtPorn", "ArchitecturePorn", "ArtPorn", "BookPorn", "CityPorn", "DesignPorn", "DestructionPorn", "EarthPorn", "FirePorn", "HistoryPorn", "GeologyPorn", "images", "FossilPorn", "MilitaryPorn", "MapPorn", "MoviePosterPorn", "ColorizedHistory", "BattlePaintings", "FighterJets", "Airplanes", "Helicopters", "WarshipPorn", "Helicopters", "HumanPorn", "OldSchoolCool", "TheWayWeWere", "VintageAds", "PropagandaPosters", "Castles", "concertposterporn", "VHScoverART", "geekporn", "waterporn", "quotesporn", "ruralporn", "macroporn", "winterporn", "ArchitecturePorn", "WQHD_Wallpaper"]
     subs_people = ["ladyladyboners", "Goddesses", "FineLadies", "gentlemanboners", "ClassicScreenBeauties", "ladyladyboners", "ladyboners", "VGB", "VintageLadyBoners", "faces", "classywomenofcolor"]
 
     subs = subs_aww + subs_comics + subs_photos + subs_imaginary + subs_sfw_images + subs_people
 
     print("downloading: sleep = {}secs".format(SLEEP_IN_SECS))
-    main(subs, num=100)
+    main(subs, num=10)
     print("\nDownloaded new images: {}".format(stats_downloaded))
