@@ -10,33 +10,17 @@
 	- praw
 
 ## FIRST ##
-
-
-
-	special handler func based on domain
-
-		1. imgur extensionless needs mime type
-
-		1. flickr doesn't download properly.
-			just save flickr url posts to a pickle, to download later when implemented
-
-
-
-
-
-
+	1. create /root/sub/ if not existing
 
 	1. default bool filter NSFW images
-		save to /srid-downloaded-NSFW/*
+		save to diff root: /srid-downloaded-NSFW/*
 
-	1. log amount of *new* images
-
-	1. create /root/sub/ if not existing
+	1. flickr doesn't download properly.
+		save flickr url posts to a pickle, to download later when implemented
 
 ## later ##
 
-
-	1. if submission == last_newest, then quit early
+	1. imgur urls not cached since filename has no ext. search without it.
 
 	1. grab extension from MIME.
 
@@ -65,14 +49,27 @@
 	1. "discover" mode
 		-output list of subs in history, if post link is:image.
 
+	1. still 'bad names"'
+		http://farm4.staticflickr.com/3815/9367019751_837a4cba99_k.jpg
+		srid-downloaded\photocritique\Long Exposure Fingal Beach - Australia.jpg
+
+		http://features.cgsociety.org/newgallerycrits/g54/287154/287154_1183902527_large.jpg
+		srid-downloaded\ImaginaryCharacters\Necromant by Ruslan Svobodin.jpg
+
+
+
+
+
 #### changelog ####
 
 # v0.2.5
-	-special behaviours for specific sites (imgur)
+	- uses urlopen so MIME and download can use a single request.
+	- special behaviours for specific sites (imgur)
+	- detect extension from MIME
 
 # v0.2.3
 	- less .delay() if file exists
-	- cache will quit early if already done
+	- cache will quit early if already done. (if submission == last_newest) then quit
 
 # v0.2.2
 	- base release version of the script
@@ -82,5 +79,4 @@
 	- pep8
 
 # v0.1
-
 	- grab lists of upvoted images

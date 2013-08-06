@@ -6,10 +6,10 @@ import pickle
 
 import praw
 
-SLEEP_IN_SECS = 1.3  # 0.3
+SLEEP_IN_SECS = .4  # 0.3
 version = "0.2.5"
 debug = True
-ignore_cache = False
+ignore_cache = True
 stats_downloaded = 0
 
 
@@ -72,6 +72,44 @@ def sanitize_filename(filename):
 
 
 def download_file(url, subreddit, title):
+    # save from url, to ./srid-downloaded/{subreddit}/{title}
+    global stats_downloaded
+
+    safe_title = sanitize_filename(title)
+    folder = os.path.join("srid-downloaded", subreddit)
+
+    # imgur also request imgage only
+    if 'imgur' in url.lower():
+        url += ".jpg"
+
+    fin = urllib.urlopen(url)
+    # custom handling, just imgur then use mime
+    if 'imgur' in url.lower():
+        ext = fin.info().getsubtype()
+        safe_title += ext
+    else:
+        ext = os.path.splitext(url)[1].lower()
+
+    filename = os.path.join(folder, safe_title + ext)
+
+    # should never see this error anymore
+    if any(x in ext.lower() for x in ("jpg", "jpeg", "png", "gif")):
+        if debug:
+            print("good: ", filename)
+    else:
+        print("bad name?\n\turl= {}\n\tfile= {} \n\text= {}".format(url, filename, ext))
+        save_url(url, subreddit, title)
+
+    if not os.path.exists(filename):
+        stats_downloaded += 1
+        with open(filename, "wb") as fout:
+            fout.write(fin.read())
+        time.sleep(SLEEP_IN_SECS)
+
+    fin.close()
+
+
+def download_file_prev(url, subreddit, title):
     # save from url, to ./srid-downloaded/{subreddit}/{title}
     global stats_downloaded
     ext = os.path.splitext(url)[1].lower()
