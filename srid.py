@@ -6,10 +6,10 @@ import pickle
 
 import praw
 
-SLEEP_IN_SECS = .4  # 0.3
-version = "0.2.5"
+SLEEP_IN_SECS = 1.3  # 0.3
+version = "0.2.6"
 debug = True
-ignore_cache = True
+ignore_cache = False
 stats_downloaded = 0
 
 
@@ -61,6 +61,14 @@ def save_url(url, subreddit, title):
         print("len: ", len(urls))
 
 
+def load_saved_urls():
+    # temp func.
+    path = os.path.join("srid-downloaded", "saved_urls.pkl")
+    with open(path, "rb") as f:
+        urls = pickle.load(f)
+        return urls
+
+
 def sanitize_filename(filename):
     # return a valid filename.
     # win7 says to use these, so it may not be fully correct cross platform,
@@ -84,13 +92,17 @@ def download_file(url, subreddit, title):
 
     fin = urllib.urlopen(url)
     # custom handling, just imgur then use mime
-    if 'imgur' in url.lower():
+    if True or 'imgur' in url.lower():
         ext = fin.info().getsubtype()
-        safe_title += ext
+        #if not safe_title.endswith(ext):
+            #safe_title += ext
     else:
         ext = os.path.splitext(url)[1].lower()
 
-    filename = os.path.join(folder, safe_title + ext)
+    if not safe_title.endswith(ext):
+        safe_title += "." + ext
+
+    filename = os.path.join(folder, safe_title)
 
     # should never see this error anymore
     if any(x in ext.lower() for x in ("jpg", "jpeg", "png", "gif")):
@@ -100,6 +112,14 @@ def download_file(url, subreddit, title):
         print("bad name?\n\turl= {}\n\tfile= {} \n\text= {}".format(url, filename, ext))
         save_url(url, subreddit, title)
 
+    # ensure /{root}/{subreddit} exists
+    try:
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+    except:
+        pass
+
+    # download if new
     if not os.path.exists(filename):
         stats_downloaded += 1
         with open(filename, "wb") as fout:
@@ -109,7 +129,7 @@ def download_file(url, subreddit, title):
     fin.close()
 
 
-def download_file_prev(url, subreddit, title):
+def download_file_old(url, subreddit, title):
     # save from url, to ./srid-downloaded/{subreddit}/{title}
     global stats_downloaded
     ext = os.path.splitext(url)[1].lower()
@@ -216,6 +236,13 @@ if __name__ == "__main__":
 
     subs = subs_aww + subs_comics + subs_photos + subs_imaginary + subs_sfw_images + subs_people
 
+    # temp download saved urls
+    if False:
+        print("saved urls!")
+        for cur in load_saved_urls():
+            (url, subreddit, title) = cur
+            download_file(url, subreddit, title)
+
     print("downloading: sleep = {}secs".format(SLEEP_IN_SECS))
-    main(subs, num=10)
+    main(subs, num=50)
     print("\nDownloaded new images: {}".format(stats_downloaded))
